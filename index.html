@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Tilchi Akbars 🐆</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root{
+  --bg:#0d0f1a;--surface:#161929;--surface2:#1e2235;--surface3:#252a3d;
+  --accent:#f5a623;--accent2:#ff6b6b;--accent3:#4ecdc4;--accent4:#a855f7;
+  --gold:#ffd700;--silver:#c0c0c0;--xp:#00e5ff;
+  --text:#e8eaf6;--muted:#8892b0;
+  --leopard:#f4a026;--leopard2:#e8891a;
+  --r:16px;--shadow:0 8px 32px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text)}
+
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
+.screen.active{opacity:1;pointer-events:all;transform:none!important}
+.screen.slide-left{transform:translateX(-100%)}
+.screen.slide-right{transform:translateX(100%)}
+
+/* ── GLOBAL HEADER ── */
+#global-header{
+  position:relative;z-index:50;
+  background:linear-gradient(180deg,var(--surface) 0%,transparent 100%);
+  padding:12px 16px 8px;
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.hdr-logo{font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;
+  background:linear-gradient(135deg,var(--leopard),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.5px}
+.hdr-stats{display:flex;gap:8px;align-items:center}
+.hdr-stat{display:flex;align-items:center;gap:4px;background:var(--surface2);border-radius:20px;padding:4px 10px;font-size:13px;font-weight:700}
+.hdr-stat svg{width:14px;height:14px}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{
+  position:relative;z-index:50;flex-shrink:0;
+  background:var(--surface);border-top:1px solid rgba(255,255,255,.06);
+  display:flex;padding:4px 0 env(safe-area-inset-bottom,4px);
+}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px;gap:3px;
+  font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;border:none;background:none;
+  text-transform:uppercase;letter-spacing:.5px}
+.nav-btn svg{width:22px;height:22px;transition:transform .2s}
+.nav-btn.active{color:var(--leopard)}
+.nav-btn.active svg{transform:scale(1.15)}
+.nav-btn:active svg{transform:scale(.9)}
+
+/* ── MAP SCREEN ── */
+#map-screen{background:var(--bg)}
+#map-scroll{flex:1;overflow-y:auto;padding:8px 16px 16px;position:relative}
+.map-path{display:flex;flex-direction:column;align-items:center;gap:0}
+.map-node{
+  width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:26px;cursor:pointer;position:relative;transition:transform .15s;flex-shrink:0;
+  border:3px solid transparent;
+}
+.map-node:active{transform:scale(.93)}
+.map-node.locked{opacity:.4;cursor:default;filter:grayscale(.8)}
+.map-node.current{
+  box-shadow:0 0 0 4px var(--leopard),0 0 24px var(--leopard);
+  animation:pulse-node 2s infinite;
+}
+@keyframes pulse-node{0%,100%{box-shadow:0 0 0 4px var(--leopard),0 0 24px var(--leopard)}
+  50%{box-shadow:0 0 0 6px var(--leopard),0 0 40px var(--leopard)}}
+.map-node.lesson{background:linear-gradient(135deg,#1e3a5f,#2563eb)}
+.map-node.chest{background:linear-gradient(135deg,#7c3a0a,#d97706)}
+.map-node.boss{background:linear-gradient(135deg,#4a0a0a,#dc2626)}
+.map-node.completed{opacity:.75}
+.map-node.completed::after{
+  content:'✓';position:absolute;bottom:-4px;right:-4px;
+  width:20px;height:20px;background:#22c55e;border-radius:50%;
+  font-size:11px;display:flex;align-items:center;justify-content:center;border:2px solid var(--bg)}
+.map-connector{width:4px;height:32px;background:var(--surface3);border-radius:2px;flex-shrink:0}
+.map-connector.done{background:linear-gradient(180deg,var(--accent3),var(--accent))}
+.section-label{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin:16px 0 8px;text-align:center;width:100%}
+
+/* ── TAMGACHI SCREEN ── */
+#pet-screen{background:radial-gradient(ellipse at 50% 30%,#1a2040 0%,var(--bg) 70%)}
+#pet-arena{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;gap:12px}
+.pet-mood-ring{
+  width:160px;height:160px;border-radius:50%;position:relative;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .2s;
+  box-shadow:0 0 60px rgba(245,166,35,.3);
+}
+.pet-mood-ring:active{transform:scale(.95)}
+.pet-emoji{font-size:80px;position:relative;z-index:1;transition:transform .3s;user-select:none}
+.pet-ring-bg{position:absolute;inset:0;border-radius:50%;border:4px solid var(--leopard);
+  animation:spin-slow 8s linear infinite}
+@keyframes spin-slow{to{transform:rotate(360deg)}}
+.pet-name{font-family:'Baloo 2',cursive;font-size:28px;font-weight:800;color:var(--leopard)}
+.pet-stats-row{display:flex;gap:12px;width:100%;max-width:320px}
+.pet-stat-bar{flex:1;background:var(--surface2);border-radius:var(--r);padding:10px 12px}
+.pet-stat-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:6px}
+.bar-track{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.25,1,.5,1)}
+.bar-fill.energy{background:linear-gradient(90deg,#f59e0b,#fde68a)}
+.bar-fill.mood{background:linear-gradient(90deg,#ec4899,#f9a8d4)}
+.bar-fill.hunger{background:linear-gradient(90deg,#22c55e,#86efac)}
+.pet-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:320px}
+.pet-action-btn{
+  padding:10px 18px;border-radius:24px;border:none;cursor:pointer;
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;
+  transition:transform .15s,box-shadow .15s;
+}
+.pet-action-btn:active{transform:scale(.93)}
+.pet-action-btn.feed{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.pet-action-btn.play{background:linear-gradient(135deg,#ec4899,#db2777);color:#fff}
+.pet-action-btn.rest{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff}
+.last-seen{font-size:12px;color:var(--muted);text-align:center}
+
+/* ── GAMES HUB ── */
+#games-screen{background:var(--bg)}
+#games-scroll{flex:1;overflow-y:auto;padding:8px 16px 16px}
+.games-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.game-card{
+  background:var(--surface);border-radius:var(--r);padding:16px;
+  cursor:pointer;transition:transform .15s,box-shadow .15s;
+  border:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;
+}
+.game-card:active{transform:scale(.96)}
+.game-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;
+  background:linear-gradient(135deg,rgba(255,255,255,.05),transparent)}
+.game-card:hover::before{opacity:1}
+.game-card-icon{font-size:36px;margin-bottom:8px}
+.game-card-title{font-size:14px;font-weight:800;margin-bottom:4px}
+.game-card-desc{font-size:11px;color:var(--muted);line-height:1.4}
+.game-card-badge{position:absolute;top:10px;right:10px;background:var(--accent2);color:#fff;
+  border-radius:8px;padding:2px 7px;font-size:10px;font-weight:800;text-transform:uppercase}
+
+/* ── GAME MODAL ── */
+#game-modal{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+#game-modal.open{opacity:1;pointer-events:all}
+#game-sheet{
+  width:100%;max-width:480px;max-height:92vh;
+  background:var(--surface);border-radius:24px 24px 0 0;
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.25,1,.5,1);
+}
+#game-modal.open #game-sheet{transform:translateY(0)}
+#game-header{display:flex;align-items:center;justify-content:space-between;padding:16px;flex-shrink:0}
+#game-title{font-family:'Baloo 2',cursive;font-size:20px;font-weight:800;color:var(--leopard)}
+#game-close{background:var(--surface2);border:none;color:var(--text);width:36px;height:36px;
+  border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+#game-content{flex:1;overflow-y:auto;padding:0 16px 16px}
+
+/* ── TAMGALAR DRAG GAME ── */
+#tamgalar-game{display:flex;flex-direction:column;gap:16px;min-height:300px}
+.tamgalar-question{text-align:center;padding:16px;background:var(--surface2);border-radius:var(--r)}
+.tamgalar-q-text{font-size:16px;font-weight:700;margin-bottom:8px}
+.tamgalar-q-img{font-size:48px}
+.tamgalar-zones{display:grid;grid-template-columns:1fr 1fr;gap:10px;min-height:120px}
+.drop-zone{
+  background:var(--surface2);border:2px dashed var(--surface3);border-radius:var(--r);
+  padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;min-height:100px;transition:border-color .2s,background .2s;cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--muted);text-align:center;
+}
+.drop-zone.drag-over{border-color:var(--accent3);background:rgba(78,205,196,.1)}
+.drop-zone.correct{border-color:#22c55e;background:rgba(34,197,94,.15)}
+.drop-zone.wrong{border-color:var(--accent2);background:rgba(255,107,107,.15)}
+.tamgalar-options{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.tamgalar-option{
+  padding:10px 14px;background:var(--surface2);border-radius:12px;
+  cursor:grab;font-size:14px;font-weight:700;
+  border:2px solid var(--surface3);transition:transform .15s,box-shadow .15s;
+  user-select:none;touch-action:none;
+}
+.tamgalar-option:active,.tamgalar-option.dragging{
+  transform:scale(1.08) rotate(-2deg);
+  box-shadow:0 12px 32px rgba(0,0,0,.4);cursor:grabbing;z-index:200;
+}
+.combo-display{text-align:center;font-size:22px;font-weight:900;color:var(--gold);
+  text-shadow:0 0 20px var(--gold);min-height:30px;transition:transform .15s}
+.combo-display.pop{transform:scale(1.3)}
+
+/* ── BLITZ ELO ARENA ── */
+#blitz-game{display:flex;flex-direction:column;gap:12px}
+.blitz-header{display:flex;justify-content:space-between;align-items:center;
+  background:var(--surface2);border-radius:var(--r);padding:12px}
+.elo-badge{display:flex;flex-direction:column;align-items:center;gap:2px}
+.elo-num{font-size:22px;font-weight:900;color:var(--gold)}
+.elo-label{font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+.vs-divider{font-size:18px;font-weight:900;color:var(--accent2)}
+.blitz-timer{text-align:center;font-size:42px;font-weight:900;
+  background:linear-gradient(135deg,var(--xp),var(--accent3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  font-family:'Baloo 2',cursive;line-height:1}
+.blitz-question{background:var(--surface2);border-radius:var(--r);padding:20px;text-align:center}
+.blitz-q-text{font-size:20px;font-weight:800;margin-bottom:4px}
+.blitz-q-ky{font-size:14px;color:var(--muted)}
+.blitz-answers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.blitz-ans{
+  padding:14px 10px;border-radius:12px;background:var(--surface2);border:2px solid var(--surface3);
+  font-size:14px;font-weight:700;cursor:pointer;text-align:center;
+  transition:all .15s;font-family:'Nunito',sans-serif;color:var(--text);
+}
+.blitz-ans:active{transform:scale(.96)}
+.blitz-ans.selected-correct{background:rgba(34,197,94,.2);border-color:#22c55e;color:#22c55e}
+.blitz-ans.selected-wrong{background:rgba(255,107,107,.2);border-color:var(--accent2);color:var(--accent2)}
+.bot-thinking{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);justify-content:center}
+.thinking-dot{width:6px;height:6px;background:var(--muted);border-radius:50%;animation:think .8s infinite}
+.thinking-dot:nth-child(2){animation-delay:.2s}
+.thinking-dot:nth-child(3){animation-delay:.4s}
+@keyframes think{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+.result-overlay{
+  text-align:center;padding:24px;display:flex;flex-direction:column;align-items:center;gap:12px;
+}
+.result-emoji{font-size:64px;animation:pop-in .5s cubic-bezier(.25,1,.5,1)}
+@keyframes pop-in{0%{transform:scale(0) rotate(-10deg)}100%{transform:scale(1) rotate(0)}}
+.result-title{font-family:'Baloo 2',cursive;font-size:28px;font-weight:900}
+.result-elo-change{font-size:18px;font-weight:800}
+.result-elo-change.positive{color:#22c55e}
+.result-elo-change.negative{color:var(--accent2)}
+.play-again-btn{
+  padding:14px 32px;border-radius:24px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--leopard),var(--accent2));
+  color:#fff;font-size:15px;font-weight:800;font-family:'Nunito',sans-serif;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 6px 24px rgba(245,166,35,.4);
+}
+.play-again-btn:active{transform:scale(.95)}
+
+/* ── WORD SEARCH GAME ── */
+#wordsearch-game{display:flex;flex-direction:column;gap:12px}
+.ws-grid{
+  display:grid;gap:2px;padding:8px;background:var(--surface2);border-radius:var(--r);
+  user-select:none;touch-action:none;
+}
+.ws-cell{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;border-radius:6px;background:var(--surface3);
+  cursor:pointer;transition:background .15s,color .15s;color:var(--text);
+}
+.ws-cell.selected{background:rgba(78,205,196,.3);color:var(--accent3)}
+.ws-cell.found{background:rgba(34,197,94,.2);color:#22c55e;animation:cell-pop .3s}
+@keyframes cell-pop{0%{transform:scale(1.3)}100%{transform:scale(1)}}
+.ws-words{display:flex;flex-wrap:wrap;gap:6px}
+.ws-word{padding:4px 10px;background:var(--surface2);border-radius:12px;
+  font-size:12px;font-weight:700;transition:all .3s}
+.ws-word.found{background:rgba(34,197,94,.15);color:#22c55e;text-decoration:line-through}
+.ws-timer-row{display:flex;justify-content:space-between;align-items:center}
+.ws-time{font-size:20px;font-weight:900;color:var(--xp)}
+.ws-score{font-size:14px;font-weight:700;color:var(--gold)}
+
+/* ── LEADERBOARD / PROFILE ── */
+#profile-screen{background:var(--bg)}
+#profile-scroll{flex:1;overflow-y:auto;padding:0 16px 16px}
+.profile-hero{
+  background:linear-gradient(135deg,var(--surface2),var(--surface));
+  border-radius:var(--r);padding:20px;margin-bottom:12px;
+  display:flex;align-items:center;gap:16px;
+  border:1px solid rgba(255,255,255,.06);
+}
+.profile-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--leopard),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0}
+.profile-name{font-family:'Baloo 2',cursive;font-size:20px;font-weight:800}
+.profile-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.profile-elo{font-size:24px;font-weight:900;color:var(--gold);margin-top:4px}
+.section-title{font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);margin:16px 0 8px}
+.achievements-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.achievement{
+  aspect-ratio:1;background:var(--surface2);border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;font-size:10px;font-weight:700;color:var(--muted);text-align:center;
+  border:1px solid rgba(255,255,255,.06);transition:all .2s;padding:6px;cursor:pointer;
+}
+.achievement.unlocked{color:var(--text);border-color:rgba(245,166,35,.3)}
+.achievement-icon{font-size:24px;margin-bottom:2px}
+.achievement.locked{opacity:.4;filter:grayscale(1)}
+.leaderboard-list{display:flex;flex-direction:column;gap:6px}
+.lb-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface2);border-radius:12px;padding:12px;
+  border:1px solid rgba(255,255,255,.06);transition:transform .15s;
+}
+.lb-row:active{transform:scale(.98)}
+.lb-row.me{border-color:rgba(245,166,35,.4);background:rgba(245,166,35,.08)}
+.lb-rank{width:28px;font-size:14px;font-weight:900;text-align:center}
+.lb-rank.gold{color:var(--gold)}
+.lb-rank.silver{color:var(--silver)}
+.lb-rank.bronze{color:#cd7f32}
+.lb-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.lb-name{flex:1;font-size:14px;font-weight:700}
+.lb-elo{font-size:13px;font-weight:800;color:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat-card{background:var(--surface2);border-radius:var(--r);padding:14px;
+  border:1px solid rgba(255,255,255,.06)}
+.stat-card-num{font-size:24px;font-weight:900;font-family:'Baloo 2',cursive}
+.stat-card-label{font-size:11px;color:var(--muted);font-weight:700;margin-top:2px}
+
+/* ── TOAST ── */
+#toast-container{position:fixed;top:80px;right:12px;z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{
+  background:var(--surface2);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:10px 16px;font-size:13px;font-weight:700;
+  box-shadow:var(--shadow);transform:translateX(120%);transition:transform .3s cubic-bezier(.25,1,.5,1);
+  display:flex;align-items:center;gap:8px;max-width:240px;
+}
+.toast.show{transform:translateX(0)}
+.toast.success{border-color:rgba(34,197,94,.4)}
+.toast.error{border-color:rgba(255,107,107,.4)}
+.toast.xp{border-color:rgba(0,229,255,.4)}
+
+/* ── CANVAS PARTICLES ── */
+#particle-canvas{position:fixed;inset:0;pointer-events:none;z-index:998}
+
+/* ── XP BAR ── */
+.xp-bar-wrap{background:var(--surface3);border-radius:4px;height:6px;overflow:hidden;margin-top:4px}
+.xp-bar-fill{height:100%;background:linear-gradient(90deg,var(--xp),var(--accent4));
+  border-radius:4px;transition:width .6s cubic-bezier(.25,1,.5,1)}
+
+/* ── ENV OVERLAY ── */
+#env-overlay{position:fixed;inset:0;pointer-events:none;z-index:1;transition:all 2s}
+
+/* ── LOADING ── */
+#loader{position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  transition:opacity .5s}
+#loader.hidden{opacity:0;pointer-events:none}
+.loader-logo{font-family:'Baloo 2',cursive;font-size:48px;font-weight:900;
+  background:linear-gradient(135deg,var(--leopard),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.loader-bar{width:200px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.loader-fill{height:100%;background:linear-gradient(90deg,var(--leopard),var(--accent2));border-radius:2px;
+  transition:width .3s;width:0}
+.loader-text{font-size:13px;color:var(--muted)}
+
+/* ── LANGUAGE TOGGLE ── */
+.lang-btn{background:var(--surface2);border:1px solid rgba(255,255,255,.1);color:var(--text);
+  border-radius:10px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;
+  font-family:'Nunito',sans-serif;transition:all .15s}
+.lang-btn:active{transform:scale(.93)}
+
+/* ── MAP SIDE LAYOUT ── */
+.map-side{display:flex;align-items:center;width:100%}
+.map-side.left{flex-direction:row}
+.map-side.right{flex-direction:row-reverse}
+.map-side-node{flex-shrink:0}
+.map-side-line{flex:1;height:4px;border-radius:2px;background:var(--surface3);margin:0 8px}
+.map-side-line.done{background:linear-gradient(90deg,var(--accent3),var(--accent))}
+.map-center{display:flex;flex-direction:column;align-items:center}
+.map-vert-line{width:4px;height:28px;background:var(--surface3);border-radius:2px}
+.map-vert-line.done{background:linear-gradient(180deg,var(--accent3),var(--accent))}
+
+/* ── DAILY STREAK ── */
+.streak-row{display:flex;gap:6px;justify-content:center;padding:8px}
+.streak-day{width:36px;height:36px;border-radius:10px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:var(--muted);
+  border:2px solid var(--surface3)}
+.streak-day.done{background:linear-gradient(135deg,var(--leopard),var(--accent2));color:#fff;border-color:transparent}
+.streak-day.today{border-color:var(--leopard)}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">🐆 Tilchi</div>
+  <div class="loader-bar"><div class="loader-fill" id="loader-fill"></div></div>
+  <div class="loader-text" id="loader-text">Жүктөлүүдө...</div>
+</div>
+
+<!-- ENV OVERLAY -->
+<div id="env-overlay"></div>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<!-- GAME MODAL -->
+<div id="game-modal">
+  <div id="game-sheet">
+    <div id="game-header">
+      <div id="game-title">Game</div>
+      <button id="game-close" onclick="GameModal.close()">✕</button>
+    </div>
+    <div id="game-content"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:flex;flex-direction:column;height:100%;position:relative;z-index:2;max-width:480px;margin:0 auto">
+
+  <!-- GLOBAL HEADER -->
+  <div id="global-header">
+    <div class="hdr-logo">🐆 Tilchi Akbars</div>
+    <div class="hdr-stats">
+      <button class="lang-btn" id="lang-toggle">KY</button>
+      <div class="hdr-stat" style="color:var(--gold)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/></svg>
+        <span id="hdr-coins">0</span>
+      </div>
+      <div class="hdr-stat" style="color:var(--accent4)">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg>
+        <span id="hdr-streak">0</span>
+      </div>
+      <div class="hdr-stat" style="color:var(--xp)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span id="hdr-xp">0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <!-- MAP -->
+  <div id="map-screen" class="screen active">
+    <div id="map-scroll">
+      <div style="text-align:center;padding:8px 0">
+        <div id="streak-display" class="streak-row"></div>
+      </div>
+      <div class="map-path" id="map-path"></div>
+    </div>
+  </div>
+
+  <!-- PET -->
+  <div id="pet-screen" class="screen slide-right">
+    <div id="pet-arena">
+      <div class="pet-mood-ring" id="pet-ring" ontouchstart="PetSystem.handleSwipe(event)" onclick="PetSystem.tap()">
+        <div class="pet-ring-bg"></div>
+        <div class="pet-emoji" id="pet-emoji">🐆</div>
+      </div>
+      <div class="pet-name" id="pet-name-label">Акбарс</div>
+      <div style="font-size:12px;color:var(--muted)">Деңгээл <span id="pet-level">1</span></div>
+      <div class="xp-bar-wrap" style="width:100%;max-width:240px">
+        <div class="xp-bar-fill" id="pet-xp-bar" style="width:0%"></div>
+      </div>
+      <div class="pet-stats-row">
+        <div class="pet-stat-bar">
+          <div class="pet-stat-label">⚡ Энергия</div>
+          <div class="bar-track"><div class="bar-fill energy" id="bar-energy" style="width:80%"></div></div>
+        </div>
+        <div class="pet-stat-bar">
+          <div class="pet-stat-label">💖 Маанай</div>
+          <div class="bar-track"><div class="bar-fill mood" id="bar-mood" style="width:70%"></div></div>
+        </div>
+        <div class="pet-stat-bar">
+          <div class="pet-stat-label">🍖 Ачкалык</div>
+          <div class="bar-track"><div class="bar-fill hunger" id="bar-hunger" style="width:60%"></div></div>
+        </div>
+      </div>
+      <div class="pet-actions">
+        <button class="pet-action-btn feed" onclick="PetSystem.feed()">🍖 Тамактандыр</button>
+        <button class="pet-action-btn play" onclick="PetSystem.play()">⚽ Ойно</button>
+        <button class="pet-action-btn rest" onclick="PetSystem.rest()">💤 Уктат</button>
+      </div>
+      <div class="last-seen" id="pet-last-seen"></div>
+    </div>
+  </div>
+
+  <!-- GAMES -->
+  <div id="games-screen" class="screen slide-right">
+    <div id="games-scroll">
+      <div class="section-label" data-i18n="games_title">Оюндар</div>
+      <div class="games-grid">
+        <div class="game-card" onclick="GameModal.open('tamgalar')">
+          <div class="game-card-badge">HOT</div>
+          <div class="game-card-icon">🔮</div>
+          <div class="game-card-title" data-i18n="game_tamgalar">Тамгалар</div>
+          <div class="game-card-desc" data-i18n="game_tamgalar_desc">Тамгаларды туура жерге жылдыр</div>
+        </div>
+        <div class="game-card" onclick="GameModal.open('blitz')">
+          <div class="game-card-badge" style="background:var(--accent4)">ELO</div>
+          <div class="game-card-icon">⚔️</div>
+          <div class="game-card-title" data-i18n="game_blitz">Blitz Арена</div>
+          <div class="game-card-desc" data-i18n="game_blitz_desc">Рейтингдик бой ELO системасы менен</div>
+        </div>
+        <div class="game-card" onclick="GameModal.open('wordsearch')">
+          <div class="game-card-icon">🔍</div>
+          <div class="game-card-title" data-i18n="game_ws">Сөз Издөө</div>
+          <div class="game-card-desc" data-i18n="game_ws_desc">Торчодон кыргыз сөздөрдү тап</div>
+        </div>
+        <div class="game-card" onclick="GameModal.open('memory')">
+          <div class="game-card-icon">🧠</div>
+          <div class="game-card-title" data-i18n="game_mem">Эс Тутум</div>
+          <div class="game-card-desc" data-i18n="game_mem_desc">Жуп карталарды тап</div>
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:20px" data-i18n="daily_challenge">Күндүк Сынак</div>
+      <div class="game-card" style="grid-column:1/-1" onclick="GameModal.open('daily')">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-size:36px">🌟</div>
+          <div>
+            <div class="game-card-title" data-i18n="daily_title">Күндүк Сынак</div>
+            <div class="game-card-desc" data-i18n="daily_desc">+3x XP бонус бар! Ар күнү жаңыланат</div>
+            <div id="daily-timer" style="font-size:11px;color:var(--accent3);font-weight:700;margin-top:4px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE / LEADERBOARD -->
+  <div id="profile-screen" class="screen slide-right">
+    <div id="profile-scroll">
+      <div class="profile-hero">
+        <div class="profile-avatar">🐆</div>
+        <div style="flex:1">
+          <div class="profile-name" id="profile-name">Акбарс Баатыр</div>
+          <div class="profile-sub" id="profile-sub">Окуучу · Бишкек</div>
+          <div class="profile-elo" id="profile-elo">⚔️ 1000 ELO</div>
+          <div class="xp-bar-wrap"><div class="xp-bar-fill" id="profile-xp-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-num" id="stat-streak" style="color:var(--leopard)">0🔥</div>
+          <div class="stat-card-label" data-i18n="stat_streak">Катар Күн</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="stat-games" style="color:var(--xp)">0</div>
+          <div class="stat-card-label" data-i18n="stat_games">Жалпы Оюн</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="stat-wins" style="color:#22c55e">0</div>
+          <div class="stat-card-label" data-i18n="stat_wins">Жеңүүлөр</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num" id="stat-xp-total" style="color:var(--gold)">0</div>
+          <div class="stat-card-label" data-i18n="stat_xp">Жалпы XP</div>
+        </div>
+      </div>
+      <div class="section-title" data-i18n="achievements">Жетишкендиктер</div>
+      <div class="achievements-grid" id="achievements-grid"></div>
+      <div class="section-title" data-i18n="leaderboard">Рейтинг</div>
+      <div class="leaderboard-list" id="leaderboard-list"></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bottom-nav">
+    <button class="nav-btn active" id="nav-map" onclick="Nav.go('map')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3V7z"/><path d="M9 4v13M15 7v13"/></svg>
+      <span data-i18n="nav_map">Карта</span>
+    </button>
+    <button class="nav-btn" id="nav-pet" onclick="Nav.go('pet')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.5 2 5.5 4.5 5 8c-.2 1.2-.1 2.4.3 3.5L4 20h16l-1.3-8.5c.4-1.1.5-2.3.3-3.5C18.5 4.5 15.5 2 12 2z"/></svg>
+      <span data-i18n="nav_pet">Барс</span>
+    </button>
+    <button class="nav-btn" id="nav-games" onclick="Nav.go('games')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="3"/><path d="M8 12h4M10 10v4M16 10.5v.01M18 13.5v.01"/></svg>
+      <span data-i18n="nav_games">Оюндар</span>
+    </button>
+    <button class="nav-btn" id="nav-profile" onclick="Nav.go('profile')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span data-i18n="nav_profile">Профиль</span>
+    </button>
+  </div>
+</div>
+
+<script>
+/* ================================================================
+   TILCHI AKBARS — GAME ENGINE
+   Principal Engineer grade vanilla JS architecture
+   ================================================================ */
+
+'use strict';
+
+/* ── I18N DICTIONARY ── */
+const DICT = {
+  ky:{
+    nav_map:'Карта',nav_pet:'Барс',nav_games:'Оюндар',nav_profile:'Профиль',
+    games_title:'Оюндар',game_tamgalar:'Тамгалар',game_tamgalar_desc:'Тамгаларды туура жерге жылдыр',
+    game_blitz:'Blitz Арена',game_blitz_desc:'Рейтингдик бой ELO системасы менен',
+    game_ws:'Сөз Издөө',game_ws_desc:'Торчодон кыргыз сөздөрдү тап',
+    game_mem:'Эс Тутум',game_mem_desc:'Жуп карталарды тап',
+    daily_challenge:'Күндүк Сынак',daily_title:'Күндүк Сынак',daily_desc:'+3x XP бонус бар! Ар күнү жаңыланат',
+    stat_streak:'Катар Күн',stat_games:'Жалпы Оюн',stat_wins:'Жеңүүлөр',stat_xp:'Жалпы XP',
+    achievements:'Жетишкендиктер',leaderboard:'Рейтинг',
+    toast_xp:'XP алдыңыз',toast_coins:'Монета алдыңыз',toast_win:'Жеңдиңиз!',toast_lose:'Кийинки жолу 💪',
+    toast_feed:'Барс тамактанды 🍖',toast_play:'Барс ойнodu ⚽',toast_rest:'Барс уктады 💤',
+    toast_combo:'Combo x',toast_level:'Деңгээл өстү!',
+  },
+  ru:{
+    nav_map:'Карта',nav_pet:'Барс',nav_games:'Игры',nav_profile:'Профиль',
+    games_title:'Игры',game_tamgalar:'Тамгалар',game_tamgalar_desc:'Перетаскивай символы',
+    game_blitz:'Blitz Арена',game_blitz_desc:'Рейтинговый бой с ELO системой',
+    game_ws:'Поиск слов',game_ws_desc:'Найди кыргызские слова в сетке',
+    game_mem:'Память',game_mem_desc:'Найди пары карточек',
+    daily_challenge:'Ежедневный Вызов',daily_title:'Ежедневный Вызов',daily_desc:'+3x XP бонус! Обновляется каждый день',
+    stat_streak:'Дней подряд',stat_games:'Всего игр',stat_wins:'Победы',stat_xp:'Всего XP',
+    achievements:'Достижения',leaderboard:'Рейтинг',
+    toast_xp:'Получил XP',toast_coins:'Получил монеты',toast_win:'Победа!',toast_lose:'В следующий раз 💪',
+    toast_feed:'Барс поел 🍖',toast_play:'Барс поиграл ⚽',toast_rest:'Барс поспал 💤',
+    toast_combo:'Combo x',toast_level:'Уровень повышен!',
+  },
+  en:{
+    nav_map:'Map',nav_pet:'Bars',nav_games:'Games',nav_profile:'Profile',
+    games_title:'Games',game_tamgalar:'Tamgalar',game_tamgalar_desc:'Drag symbols to correct zones',
+    game_blitz:'Blitz Arena',game_blitz_desc:'Rated battle with ELO system',
+    game_ws:'Word Search',game_ws_desc:'Find Kyrgyz words in the grid',
+    game_mem:'Memory',game_mem_desc:'Match pairs of cards',
+    daily_challenge:'Daily Challenge',daily_title:'Daily Challenge',daily_desc:'+3x XP bonus! Resets every day',
+    stat_streak:'Day Streak',stat_games:'Total Games',stat_wins:'Wins',stat_xp:'Total XP',
+    achievements:'Achievements',leaderboard:'Leaderboard',
+    toast_xp:'XP earned',toast_coins:'Coins earned',toast_win:'Victory!',toast_lose:'Next time 💪',
+    toast_feed:'Bars ate 🍖',toast_play:'Bars played ⚽',toast_rest:'Bars rested 💤',
+    toast_combo:'Combo x',toast_level:'Level up!',
+  }
+};
+
+/* ── REACTIVE STORE (Proxy-based) ── */
+const Store = (() => {
+  const subscribers = new Map();
+  let state = {
+    lang: 'ky',
+    coins: 120,
+    crystals: 5,
+    xp: 340,
+    xpToNext: 500,
+    level: 3,
+    streak: 5,
+    totalGames: 18,
+    totalWins: 11,
+    totalXP: 1240,
+    elo: 1052,
+    mapProgress: 4,
+    pet: {
+      energy: 72,
+      mood: 85,
+      hunger: 60,
+      lastSeen: Date.now() - 1800000,
+      level: 2,
+      xp: 45,
+      xpToNext: 100,
+    },
+    achievements: {
+      first_win: true, streak_3: true, xp_1000: true,
+      games_10: true, elo_1100: false, streak_7: false,
+      words_master: false, perfect_round: false,
+    },
+    streakDays: [true, true, true, true, true, false, false],
+  };
+
+  // Deep proxy handler
+  function makeProxy(obj, path = '') {
+    return new Proxy(obj, {
+      get(target, key) {
+        const val = target[key];
+        if (val && typeof val === 'object' && !Array.isArray(val)) {
+          return makeProxy(val, path ? `${path}.${key}` : key);
+        }
+        return val;
+      },
+      set(target, key, value) {
+        const fullKey = path ? `${path}.${key}` : key;
+        target[key] = value;
+        notify(fullKey, value);
+        // Save to localStorage
+        try { localStorage.setItem('tilchi_state', JSON.stringify(state)); } catch(_){}
+        return true;
+      }
+    });
+  }
+
+  function notify(key, value) {
+    (subscribers.get(key) || []).forEach(fn => fn(value));
+    (subscribers.get('*') || []).forEach(fn => fn(key, value));
+  }
+
+  function subscribe(key, fn) {
+    if (!subscribers.has(key)) subscribers.set(key, []);
+    subscribers.get(key).push(fn);
+    return () => {
+      const list = subscribers.get(key) || [];
+      const i = list.indexOf(fn);
+      if (i > -1) list.splice(i, 1);
+    };
+  }
+
+  // Load saved state
+  try {
+    const saved = JSON.parse(localStorage.getItem('tilchi_state') || 'null');
+    if (saved) {
+      // Merge deeply
+      function deepMerge(target, source) {
+        for (const k in source) {
+          if (source[k] && typeof source[k] === 'object' && !Array.isArray(source[k]) && target[k]) {
+            deepMerge(target[k], source[k]);
+          } else { target[k] = source[k]; }
+        }
+      }
+      deepMerge(state, saved);
+    }
+  } catch(_){}
+
+  const proxy = makeProxy(state);
+  return { state: proxy, subscribe, get: (key) => {
+    const parts = key.split('.');
+    let v = state;
+    for (const p of parts) v = v?.[p];
+    return v;
+  }};
+})();
+
+/* ── I18N ENGINE ── */
+const I18N = {
+  t(key) { return DICT[Store.state.lang]?.[key] || DICT.ky[key] || key; },
+  update() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      el.textContent = I18N.t(key);
+    });
+    document.getElementById('lang-toggle').textContent = Store.state.lang.toUpperCase();
+  },
+  cycle() {
+    const langs = ['ky', 'ru', 'en'];
+    const i = langs.indexOf(Store.state.lang);
+    Store.state.lang = langs[(i + 1) % langs.length];
+    I18N.update();
+    Toast.show(Store.state.lang.toUpperCase() + ' ✓', 'success');
+  }
+};
+
+/* ── PARTICLE ENGINE (Canvas) ── */
+const Particles = (() => {
+  const canvas = document.getElementById('particle-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let raf = null;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Particle {
+    constructor(x, y, type = 'confetti') {
+      this.x = x; this.y = y; this.type = type;
+      this.vx = (Math.random() - .5) * (type === 'spark' ? 8 : 5);
+      this.vy = (Math.random() * -8 - 2);
+      this.ax = 0; this.ay = type === 'snow' ? .1 : .3;
+      this.life = 1; this.decay = Math.random() * .02 + .015;
+      this.size = Math.random() * (type === 'confetti' ? 8 : 4) + 3;
+      this.color = type === 'confetti'
+        ? ['#f5a623','#ff6b6b','#4ecdc4','#a855f7','#ffd700','#00e5ff'][Math.floor(Math.random()*6)]
+        : type === 'spark' ? '#ffd700' : '#a8d8ea';
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - .5) * .2;
+    }
+    update() {
+      this.vx += this.ax; this.vy += this.ay;
+      this.x += this.vx; this.y += this.vy;
+      this.life -= this.decay;
+      this.rotation += this.rotSpeed;
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, this.life);
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.fillStyle = this.color;
+      if (this.type === 'confetti') {
+        ctx.fillRect(-this.size/2, -this.size/4, this.size, this.size/2);
+      } else if (this.type === 'spark') {
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size/2, 0, Math.PI*2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size/2, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(168,216,234,.6)';
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => { p.update(); p.draw(); });
+    if (particles.length > 0) raf = requestAnimationFrame(loop);
+    else raf = null;
+  }
+
+  function burst(x, y, type = 'confetti', count = 40) {
+    for (let i = 0; i < count; i++) particles.push(new Particle(x, y, type));
+    if (!raf) raf = requestAnimationFrame(loop);
+  }
+
+  function celebrate() {
+    const cx = window.innerWidth / 2;
+    burst(cx, window.innerHeight * .4, 'confetti', 80);
+    burst(cx - 100, window.innerHeight * .3, 'spark', 30);
+    burst(cx + 100, window.innerHeight * .3, 'spark', 30);
+  }
+
+  return { burst, celebrate };
+})();
+
+/* ── TOAST ENGINE ── */
+const Toast = (() => {
+  const container = document.getElementById('toast-container');
+
+  function show(msg, type = '', icon = '') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `${icon ? `<span>${icon}</span>` : ''}<span>${msg}</span>`;
+    container.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+    setTimeout(() => {
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 350);
+    }, 2200);
+  }
+  return { show };
+})();
+
+/* ── ENVIRONMENT / DAY CYCLE ── */
+const EnvSystem = (() => {
+  const overlay = document.getElementById('env-overlay');
+  const phases = [
+    { name:'night', start:0, end:6,     bg:'rgba(0,0,20,.55)' },
+    { name:'dawn',  start:6, end:9,     bg:'rgba(255,100,30,.12)' },
+    { name:'day',   start:9, end:17,    bg:'rgba(255,220,100,.06)' },
+    { name:'sunset',start:17, end:20,   bg:'rgba(255,80,30,.15)' },
+    { name:'night', start:20, end:24,   bg:'rgba(0,0,20,.45)' },
+  ];
+
+  function update() {
+    const h = new Date().getHours();
+    const phase = phases.find(p => h >= p.start && h < p.end) || phases[0];
+    overlay.style.background = phase.bg;
+  }
+
+  update();
+  setInterval(update, 60000);
+  return { update };
+})();
+
+/* ── NAVIGATION ── */
+const Nav = (() => {
+  let current = 'map';
+  const screens = { map:'map-screen', pet:'pet-screen', games:'games-screen', profile:'profile-screen' };
+  const navBtns = { map:'nav-map', pet:'nav-pet', games:'nav-games', profile:'nav-profile' };
+
+  function go(name) {
+    if (name === current) return;
+    const prev = current;
+    current = name;
+
+    const order = ['map','pet','games','profile'];
+    const pIdx = order.indexOf(prev);
+    const nIdx = order.indexOf(name);
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    const prevEl = document.getElementById(screens[prev]);
+    const nextEl = document.getElementById(screens[name]);
+
+    prevEl.classList.add(nIdx > pIdx ? 'slide-left' : 'slide-right');
+    nextEl.classList.remove('slide-left','slide-right');
+    nextEl.classList.add('active');
+
+    setTimeout(() => prevEl.classList.remove('slide-left','slide-right'), 350);
+    document.getElementById(navBtns[name]).classList.add('active');
+
+    // Trigger screen-specific updates
+    if (name === 'profile') ProfileScreen.refresh();
+    if (name === 'pet') PetSystem.updateUI();
+  }
+  return { go };
+})();
+
+/* ── HEADER UPDATE ── */
+function updateHeader() {
+  document.getElementById('hdr-coins').textContent = Store.state.coins;
+  document.getElementById('hdr-streak').textContent = Store.state.streak;
+  document.getElementById('hdr-xp').textContent = Store.state.xp;
+}
+
+/* ── XP SYSTEM ── */
+const XPSystem = {
+  gain(amount, multiplier = 1, diffMultiplier = 1) {
+    const total = Math.round(amount * multiplier * diffMultiplier);
+    Store.state.xp += total;
+    Store.state.totalXP += total;
+    Toast.show(`+${total} XP`, 'xp', '⚡');
+    if (Store.state.xp >= Store.state.xpToNext) {
+      Store.state.xp -= Store.state.xpToNext;
+      Store.state.level++;
+      Store.state.xpToNext = Math.round(Store.state.xpToNext * 1.4);
+      Toast.show(I18N.t('toast_level') + ' ' + Store.state.level, 'success', '🎉');
+      Particles.celebrate();
+    }
+    updateHeader();
+  },
+  addCoins(n) {
+    Store.state.coins += n;
+    updateHeader();
+    Toast.show(`+${n} 🪙`, 'xp', '');
+  }
+};
+
+/* ── STREAK RENDERER ── */
+function renderStreak() {
+  const days = ['Дш','Шш','Шр','Бш','Жм','Иш','Жк'];
+  const container = document.getElementById('streak-display');
+  container.innerHTML = Store.state.streakDays.map((done, i) =>
+    `<div class="streak-day ${done?'done':''} ${i===new Date().getDay()?'today':''}">${days[i]}</div>`
+  ).join('');
+}
+
+/* ── MAP RENDERER ── */
+const MapRenderer = {
+  nodes: [
+    {id:1,type:'lesson',emoji:'📝',title:'Тамгалар A'},
+    {id:2,type:'lesson',emoji:'🔤',title:'Тамгалар B'},
+    {id:3,type:'chest',emoji:'📦',title:'Сыйлык'},
+    {id:4,type:'lesson',emoji:'🗣',title:'Сөздөр'},
+    {id:5,type:'boss',emoji:'👹',title:'Босс'},
+    {id:6,type:'lesson',emoji:'✍️',title:'Жазуу'},
+    {id:7,type:'chest',emoji:'💎',title:'Кристалл'},
+    {id:8,type:'lesson',emoji:'📖',title:'Сүйлөмдөр'},
+    {id:9,type:'boss',emoji:'🔥',title:'Финал'},
+  ],
+
+  render() {
+    const container = document.getElementById('map-path');
+    container.innerHTML = '';
+    const progress = Store.state.mapProgress;
+    const nodes = this.nodes;
+
+    nodes.forEach((node, idx) => {
+      const completed = idx < progress;
+      const current = idx === progress;
+      const locked = idx > progress;
+
+      // Vertical connector above (except first)
+      if (idx > 0) {
+        const vc = document.createElement('div');
+        vc.className = 'map-vert-line' + (idx <= progress ? ' done' : '');
+        container.appendChild(vc);
+      }
+
+      // Node row
+      const nodeEl = document.createElement('div');
+      nodeEl.className = `map-node ${node.type} ${completed?'completed':''} ${current?'current':''} ${locked?'locked':''}`;
+      nodeEl.textContent = node.emoji;
+      nodeEl.title = node.title;
+      if (!locked) nodeEl.onclick = () => MapRenderer.tapNode(node, current, completed);
+
+      // Offset for zig-zag
+      const offset = idx % 2 === 0 ? '40px' : '-40px';
+      nodeEl.style.marginLeft = offset;
+
+      container.appendChild(nodeEl);
+    });
+  },
+
+  tapNode(node, isCurrent, isCompleted) {
+    if (isCurrent) {
+      if (node.type === 'chest') {
+        XPSystem.addCoins(15 + Math.floor(Math.random()*20));
+        Store.state.mapProgress++;
+        this.render();
+        Particles.celebrate();
+      } else if (node.type === 'boss') {
+        GameModal.open('blitz');
+      } else {
+        GameModal.open('tamgalar');
+      }
+    } else if (isCompleted) {
+      Toast.show('Бул нод аяктады ✓', 'success');
+    }
+  }
+};
+
+/* ── PET SYSTEM ── */
+const PetSystem = (() => {
+  const EMOJIS = {
+    happy: '😸', normal: '🐱', sad: '😿', sleeping: '😴', excited: '🤩',
+    hungry: '😾', veryHappy: '🥰'
+  };
+  let swipeStart = null;
+
+  function getMood() {
+    const { energy, mood, hunger } = Store.state.pet;
+    const avg = (energy + mood + hunger) / 3;
+    if (avg > 85) return 'veryHappy';
+    if (avg > 65) return 'happy';
+    if (energy < 20) return 'sleeping';
+    if (hunger < 25) return 'hungry';
+    if (avg < 40) return 'sad';
+    return 'normal';
+  }
+
+  function decay() {
+    const now = Date.now();
+    const diff = now - Store.state.pet.lastSeen;
+    const mins = diff / 60000;
+    const pet = Store.state.pet;
+    pet.energy = Math.max(0, pet.energy - mins * 0.8);
+    pet.mood   = Math.max(0, pet.mood   - mins * 0.5);
+    pet.hunger = Math.max(0, pet.hunger - mins * 1.0);
+    pet.lastSeen = now;
+    // Neglect penalty
+    if (diff > 3 * 24 * 60 * 60000) {
+      Store.state.xp = Math.max(0, Store.state.xp - Math.floor(Store.state.xp * .5));
+      Toast.show('Барс сагынды! -50% XP 😿', 'error');
+    }
+  }
+
+  function updateUI() {
+    decay();
+    const pet = Store.state.pet;
+    const moodKey = getMood();
+    document.getElementById('pet-emoji').textContent = EMOJIS[moodKey] || '🐆';
+    document.getElementById('bar-energy').style.width = pet.energy + '%';
+    document.getElementById('bar-mood').style.width = pet.mood + '%';
+    document.getElementById('bar-hunger').style.width = pet.hunger + '%';
+    document.getElementById('pet-level').textContent = pet.level;
+    document.getElementById('pet-xp-bar').style.width = (pet.xp / pet.xpToNext * 100) + '%';
+
+    const mins = Math.round((Date.now() - pet.lastSeen) / 60000);
+    const timeStr = mins < 60 ? `${mins} мин. мурун` : `${Math.floor(mins/60)} саат мурун`;
+    document.getElementById('pet-last-seen').textContent = timeStr;
+  }
+
+  function feed() {
+    Store.state.pet.hunger = Math.min(100, Store.state.pet.hunger + 30);
+    Store.state.pet.mood = Math.min(100, Store.state.pet.mood + 5);
+    updateUI();
+    Toast.show(I18N.t('toast_feed'), 'success');
+    bump();
+  }
+  function play() {
+    Store.state.pet.mood = Math.min(100, Store.state.pet.mood + 25);
+    Store.state.pet.energy = Math.max(0, Store.state.pet.energy - 10);
+    updateUI();
+    Toast.show(I18N.t('toast_play'), 'success');
+    bump();
+  }
+  function rest() {
+    Store.state.pet.energy = Math.min(100, Store.state.pet.energy + 35);
+    updateUI();
+    Toast.show(I18N.t('toast_rest'), 'success');
+    bump();
+  }
+  function tap() {
+    Store.state.pet.mood = Math.min(100, Store.state.pet.mood + 3);
+    bump();
+    updateUI();
+  }
+  function bump() {
+    const el = document.getElementById('pet-emoji');
+    el.style.transform = 'scale(1.2) rotate(-5deg)';
+    setTimeout(() => el.style.transform = '', 200);
+    const ring = document.getElementById('pet-ring');
+    const rect = ring.getBoundingClientRect();
+    Particles.burst(rect.left + rect.width/2, rect.top + rect.height/2, 'spark', 12);
+  }
+
+  function handleSwipe(e) {
+    if (e.type === 'touchstart') {
+      swipeStart = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() };
+    }
+  }
+  document.addEventListener('touchend', (e) => {
+    if (!swipeStart) return;
+    const dx = e.changedTouches[0].clientX - swipeStart.x;
+    const dt = Date.now() - swipeStart.t;
+    const velocity = Math.abs(dx) / dt;
+    if (velocity > .5) {
+      const boost = Math.min(20, Math.round(velocity * 10));
+      Store.state.pet.mood = Math.min(100, Store.state.pet.mood + boost);
+      PetSystem.updateUI();
+      Toast.show(`+${boost} маанай 💖`, 'success');
+    }
+    swipeStart = null;
+  });
+
+  // Auto-decay interval
+  setInterval(() => {
+    if (document.getElementById('pet-screen').classList.contains('active')) updateUI();
+  }, 30000);
+
+  return { updateUI, feed, play, rest, tap, handleSwipe };
+})();
+
+/* ── ADAPTIVE DIFFICULTY ── */
+const AdaptiveDifficulty = (() => {
+  const history = { correct: 0, wrong: 0, avgTime: 3000 };
+  function getLevel() {
+    if (history.correct > history.wrong * 2 && history.avgTime < 2500) return 'hard';
+    if (history.wrong > history.correct) return 'easy';
+    return 'medium';
+  }
+  function record(correct, time) {
+    if (correct) history.correct++;
+    else history.wrong++;
+    history.avgTime = (history.avgTime + time) / 2;
+  }
+  function multiplier() { return { easy:.8, medium:1, hard:1.5 }[getLevel()]; }
+  return { getLevel, record, multiplier };
+})();
+
+/* ── TAMGALAR GAME ── */
+const TamgalarGame = (() => {
+  const DATA = [
+    { q: 'А', answer: 'Алма', wrong: 'Бал', emoji: '🍎', ky: 'Алма', ru: 'Яблоко' },
+    { q: 'Б', answer: 'Бал', wrong: 'Алма', emoji: '🍯', ky: 'Бал', ru: 'Мёд' },
+    { q: 'К', answer: 'Кой', wrong: 'Ат', emoji: '🐑', ky: 'Кой', ru: 'Овца' },
+    { q: 'А', answer: 'Ат', wrong: 'Кой', emoji: '🐴', ky: 'Ат', ru: 'Конь' },
+    { q: 'Д', answer: 'Дарак', wrong: 'Суу', emoji: '🌳', ky: 'Дарак', ru: 'Дерево' },
+    { q: 'С', answer: 'Суу', wrong: 'Дарак', emoji: '💧', ky: 'Суу', ru: 'Вода' },
+    { q: 'Т', answer: 'Тоо', wrong: 'Жол', emoji: '⛰️', ky: 'Тоо', ru: 'Гора' },
+    { q: 'Ж', answer: 'Жол', wrong: 'Тоо', emoji: '🛣️', ky: 'Жол', ru: 'Дорога' },
+  ];
+  let current = null, comboCount = 0, lastCorrectTime = 0, score = 0, answered = 0;
+  let dragging = null, dragEl = null, offsetX = 0, offsetY = 0;
+  let startTime = 0;
+
+  function shuffle(arr) { return [...arr].sort(() => Math.random()-.5); }
+
+  function render() {
+    const pool = shuffle(DATA).slice(0, 4);
+    current = pool;
+    score = 0; answered = 0; comboCount = 0;
+    const el = document.getElementById('tamgalar-game');
+    el.innerHTML = `
+      <div class="combo-display" id="tg-combo"></div>
+      <div style="display:flex;flex-direction:column;gap:16px" id="tg-rounds"></div>
+    `;
+    renderRound(0, pool);
+  }
+
+  function renderRound(idx, pool) {
+    if (idx >= pool.length) { finish(); return; }
+    const item = pool[idx];
+    const zones = shuffle([item.answer, item.wrong]);
+    const container = document.getElementById('tg-rounds');
+    container.innerHTML = `
+      <div class="tamgalar-question">
+        <div class="tamgalar-q-img">${item.emoji}</div>
+        <div class="tamgalar-q-text">${item.ky} — что это начинается с <span style="color:var(--leopard);font-size:20px">${item.q}</span>?</div>
+      </div>
+      <div class="tamgalar-zones" id="drop-zones">
+        ${zones.map(z => `<div class="drop-zone" data-answer="${z}" onclick="TamgalarGame.zoneTap('${z}','${item.answer}',${idx})">${z}</div>`).join('')}
+      </div>
+      <div class="tamgalar-options" id="drag-options">
+        <div class="tamgalar-option" draggable="true" data-word="${item.answer}"
+          onpointerdown="TamgalarGame.startDrag(event,'${item.answer}','${item.answer}','${idx}')"
+          >${item.answer}</div>
+        <div class="tamgalar-option" draggable="true" data-word="${item.wrong}"
+          onpointerdown="TamgalarGame.startDrag(event,'${item.wrong}','${item.answer}','${idx}')"
+          >${item.wrong}</div>
+      </div>
+      <div style="text-align:center;font-size:13px;color:var(--muted)">Сүйрөп же басып тандаңыз</div>
+      <div style="text-align:center;font-weight:700">Score: <span id="tg-score" style="color:var(--gold)">${score}</span></div>
+    `;
+    startTime = Date.now();
+  }
+
+  function zoneTap(selected, correct, idx) {
+    handleAnswer(selected === correct, idx);
+  }
+
+  function handleAnswer(isCorrect, idx) {
+    const t = Date.now() - startTime;
+    AdaptiveDifficulty.record(isCorrect, t);
+    if (isCorrect) {
+      answered++;
+      const timeSec = t / 1000;
+      let combo = 1;
+      if (timeSec < 3 && (Date.now() - lastCorrectTime) < 5000) { comboCount++; combo = Math.min(3, 1 + Math.floor(comboCount/2)); }
+      else comboCount = 0;
+      lastCorrectTime = Date.now();
+      score += 10 * combo;
+
+      const comboEl = document.getElementById('tg-combo');
+      if (combo > 1) {
+        comboEl.textContent = I18N.t('toast_combo') + combo + '! 🔥';
+        comboEl.classList.add('pop');
+        setTimeout(() => comboEl.classList.remove('pop'), 300);
+      } else comboEl.textContent = '';
+
+      // Flash green
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('correct','wrong'));
+      document.querySelectorAll('.drop-zone[data-answer]').forEach(z => {
+        if (z.dataset.answer === current[idx].answer) z.classList.add('correct');
+      });
+      setTimeout(() => renderRound(idx + 1, current), 600);
+    } else {
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.add('wrong'));
+      setTimeout(() => document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('wrong')), 500);
+    }
+  }
+
+  function startDrag(e, word, correct, idx) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragEl = e.currentTarget.cloneNode(true);
+    dragEl.style.cssText = `position:fixed;z-index:999;pointer-events:none;transform:scale(1.1) rotate(-3deg);opacity:.9;
+      background:#252a3d;border:2px solid var(--accent3);border-radius:12px;padding:10px 14px;font-size:14px;font-weight:700;color:var(--text)`;
+    document.body.appendChild(dragEl);
+    offsetX = e.clientX; offsetY = e.clientY;
+
+    function onMove(ev) {
+      dragEl.style.left = (ev.clientX - 30) + 'px';
+      dragEl.style.top  = (ev.clientY - 20) + 'px';
+      // Highlight zones
+      document.querySelectorAll('.drop-zone').forEach(z => {
+        const r = z.getBoundingClientRect();
+        const over = ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom;
+        z.classList.toggle('drag-over', over);
+      });
+    }
+    function onUp(ev) {
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+      dragEl.remove(); dragEl = null;
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('drag-over'));
+      // Check drop target
+      let dropped = false;
+      document.querySelectorAll('.drop-zone').forEach(z => {
+        const r = z.getBoundingClientRect();
+        if (ev.clientX >= r.left && ev.clientX <= r.right && ev.clientY >= r.top && ev.clientY <= r.bottom) {
+          dropped = true;
+          handleAnswer(z.dataset.answer === correct, idx);
+        }
+      });
+      if (!dropped) {
+        // snapped back — no penalty
+      }
+    }
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  }
+
+  function finish() {
+    const xpGained = score * AdaptiveDifficulty.multiplier();
+    XPSystem.gain(xpGained);
+    XPSystem.addCoins(Math.floor(score / 5));
+    Particles.celebrate();
+    Store.state.totalGames++;
+    const el = document.getElementById('tamgalar-game');
+    el.innerHTML = `
+      <div class="result-overlay">
+        <div class="result-emoji">🏆</div>
+        <div class="result-title" style="color:var(--gold)">Жакшы болду!</div>
+        <div style="font-size:16px;font-weight:700">Score: ${score}</div>
+        <div style="font-size:13px;color:var(--muted)">Кыйынчылык: ${AdaptiveDifficulty.getLevel()}</div>
+        <button class="play-again-btn" onclick="TamgalarGame.render()">🔄 Дагы ойно</button>
+      </div>
+    `;
+  }
+
+  return { render, zoneTap, startDrag };
+})();
+
+/* ── ELO BLITZ ARENA ── */
+const BlitzGame = (() => {
+  const QUESTIONS = [
+    { ky:'Бул эмне?', ru:'Что это?', word:'алма', img:'🍎', answers:['алма','бал','кой','ат'], correct:0 },
+    { ky:'Кайсы?',    ru:'Какой?',   word:'кызыл', img:'🔴', answers:['жашыл','кызыл','сары','көк'], correct:1 },
+    { ky:'Санды тап', ru:'Найди число', word:'беш', img:'5️⃣', answers:['үч','төрт','беш','алты'], correct:2 },
+    { ky:'Бул эмне?', ru:'Что это?', word:'ит', img:'🐕', answers:['мышык','ит','жылкы','кой'], correct:1 },
+    { ky:'Кайсы?',    ru:'Какой?',   word:'чоң', img:'🐘', answers:['кичи','чоң','бийик','кыска'], correct:1 },
+    { ky:'Бул эмне?', ru:'Что это?', word:'суу', img:'💧', answers:['суу','от','жер','аба'], correct:0 },
+    { ky:'Санды тап', ru:'Найди число', word:'жети', img:'7️⃣', answers:['беш','алты','жети','сегиз'], correct:2 },
+    { ky:'Бул эмне?', ru:'Что это?', word:'ай', img:'🌙', answers:['жылдыз','күн','ай','булут'], correct:2 },
+  ];
+
+  let timeLeft = 30, timer = null, qIdx = 0, playerScore = 0, botScore = 0;
+  let botElo = 0, answered = false, roundActive = false;
+
+  function calcExpected(playerElo, enemyElo) {
+    return 1 / (1 + Math.pow(10, (enemyElo - playerElo) / 400));
+  }
+  function newElo(old, result, expected, K = 32) {
+    return Math.round(old + K * (result - expected));
+  }
+
+  function render() {
+    const playerElo = Store.state.elo;
+    botElo = playerElo + Math.floor((Math.random() - .5) * 100);
+    qIdx = 0; playerScore = 0; botScore = 0; answered = false;
+
+    const el = document.getElementById('blitz-game');
+    el.innerHTML = `
+      <div class="blitz-header">
+        <div class="elo-badge">
+          <div class="elo-num">${playerElo}</div>
+          <div class="elo-label">Сиз</div>
+        </div>
+        <div class="vs-divider">VS</div>
+        <div class="elo-badge">
+          <div class="elo-num">${botElo}</div>
+          <div class="elo-label">Bot</div>
+        </div>
+      </div>
+      <div class="blitz-timer" id="blitz-timer">30</div>
+      <div id="blitz-q-area"></div>
+      <div class="bot-thinking" id="bot-thinking" style="display:none">
+        <div class="thinking-dot"></div><div class="thinking-dot"></div><div class="thinking-dot"></div>
+        <span style="margin-left:4px">Bot ойлонууда...</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;font-weight:700;color:var(--muted)">
+        <span>Сиз: <span id="p-score" style="color:var(--xp)">${playerScore}</span></span>
+        <span>Bot: <span id="b-score" style="color:var(--accent2)">${botScore}</span></span>
+      </div>
+    `;
+    nextQuestion();
+    startTimer();
+  }
+
+  function nextQuestion() {
+    if (qIdx >= QUESTIONS.length) { endGame(); return; }
+    answered = false;
+    const q = QUESTIONS[qIdx];
+    const qa = document.getElementById('blitz-q-area');
+    if (!qa) return;
+    qa.innerHTML = `
+      <div class="blitz-question">
+        <div style="font-size:40px">${q.img}</div>
+        <div class="blitz-q-text">${q.word}</div>
+        <div class="blitz-q-ky">${q.ky}</div>
+      </div>
+      <div class="blitz-answers" id="blitz-ans-grid">
+        ${q.answers.map((a,i) => `<button class="blitz-ans" onclick="BlitzGame.answer(${i})">${a}</button>`).join('')}
+      </div>
+    `;
+    // Simulate bot thinking
+    const botDelay = 800 + Math.random() * 2000;
+    const botCorrect = Math.random() < 0.6; // 60% chance
+    document.getElementById('bot-thinking').style.display = 'flex';
+    setTimeout(() => {
+      if (!answered) {
+        if (botCorrect) { botScore++; document.getElementById('b-score').textContent = botScore; }
+        document.getElementById('bot-thinking').style.display = 'none';
+      }
+    }, botDelay);
+  }
+
+  function answer(idx) {
+    if (answered) return;
+    answered = true;
+    const q = QUESTIONS[qIdx];
+    const isCorrect = idx === q.correct;
+    const btns = document.querySelectorAll('.blitz-ans');
+    btns[idx].classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+    if (isCorrect) { playerScore++; document.getElementById('p-score').textContent = playerScore; }
+    qIdx++;
+    setTimeout(nextQuestion, 700);
+  }
+
+  function startTimer() {
+    timeLeft = 30;
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+      timeLeft--;
+      const el = document.getElementById('blitz-timer');
+      if (el) el.textContent = timeLeft;
+      if (timeLeft <= 0) endGame();
+    }, 1000);
+  }
+
+  function endGame() {
+    clearInterval(timer);
+    const playerElo = Store.state.elo;
+    const expected = calcExpected(playerElo, botElo);
+    const result = playerScore > botScore ? 1 : playerScore === botScore ? .5 : 0;
+    const newRating = newElo(playerElo, result, expected);
+    const delta = newRating - playerElo;
+    Store.state.elo = newRating;
+    Store.state.totalGames++;
+    if (result === 1) { Store.state.totalWins++; XPSystem.gain(80, 1, AdaptiveDifficulty.multiplier()); Particles.celebrate(); }
+    else XPSystem.gain(20);
+
+    const el = document.getElementById('blitz-game');
+    const emoji = result === 1 ? '🏆' : result === .5 ? '🤝' : '😤';
+    const title = result === 1 ? I18N.t('toast_win') : result === .5 ? 'Дооматсыз!' : I18N.t('toast_lose');
+    el.innerHTML = `
+      <div class="result-overlay">
+        <div class="result-emoji">${emoji}</div>
+        <div class="result-title">${title}</div>
+        <div style="font-size:14px;font-weight:700">${playerScore} — ${botScore}</div>
+        <div class="result-elo-change ${delta >= 0 ? 'positive' : 'negative'}">${delta >= 0 ? '+' : ''}${delta} ELO</div>
+        <div style="font-size:13px;color:var(--muted)">Жаңы рейтинг: ${newRating}</div>
+        <button class="play-again-btn" onclick="BlitzGame.render()">⚔️ Дагы беттеш</button>
+      </div>
+    `;
+  }
+
+  return { render, answer };
+})();
+
+/* ── WORD SEARCH GAME ── */
+const WordSearchGame = (() => {
+  const WORDS_KY = ['АЛМА','БАЛ','КОЙ','АТ','СУУ','ТОО','ЖОЛ','КҮН','АЙ','УЙ'];
+  const SIZE = 9;
+  let grid = [], foundWords = new Set(), allWords = [], selecting = false, selCells = [];
+  let timeLeft = 120, timer = null, startX = null, startY = null;
+
+  function makeGrid() {
+    const g = Array.from({length:SIZE}, () => Array(SIZE).fill(''));
+    const placed = [];
+    const DIRS = [[0,1],[1,0],[1,1],[0,-1],[-1,0]];
+
+    function tryPlace(word) {
+      for (let attempt = 0; attempt < 30; attempt++) {
+        const dir = DIRS[Math.floor(Math.random()*DIRS.length)];
+        const r = Math.floor(Math.random()*SIZE);
+        const c = Math.floor(Math.random()*SIZE);
+        let ok = true;
+        for (let i = 0; i < word.length; i++) {
+          const nr = r + dir[0]*i, nc = c + dir[1]*i;
+          if (nr<0||nr>=SIZE||nc<0||nc>=SIZE) { ok=false; break; }
+          if (g[nr][nc] && g[nr][nc]!==word[i]) { ok=false; break; }
+        }
+        if (ok) {
+          for (let i = 0; i < word.length; i++) g[r+dir[0]*i][c+dir[1]*i] = word[i];
+          placed.push({word,r,c,dir});
+          return true;
+        }
+      }
+      return false;
+    }
+
+    const subset = WORDS_KY.slice().sort(()=>Math.random()-.5).slice(0,5);
+    subset.forEach(w => tryPlace(w));
+
+    // Fill empty with random Kyrgyz letters
+    const KY_LETTERS = 'АБВГДЕЙЗИКМНОПРСТУФХЧШЫЮЯЖЁҮҢӨК';
+    for (let r=0;r<SIZE;r++) for (let c=0;c<SIZE;c++) {
+      if (!g[r][c]) g[r][c] = KY_LETTERS[Math.floor(Math.random()*KY_LETTERS.length)];
+    }
+    return { grid: g, words: subset.map(w=>({word:w,...placed.find(p=>p.word===w)})) };
+  }
+
+  function render() {
+    const data = makeGrid();
+    grid = data.grid;
+    allWords = data.words;
+    foundWords = new Set();
+    selCells = [];
+
+    const el = document.getElementById('wordsearch-game');
+    el.innerHTML = `
+      <div class="ws-timer-row">
+        <div class="ws-time" id="ws-time">2:00</div>
+        <div class="ws-score" id="ws-score">0 / ${allWords.length}</div>
+      </div>
+      <div class="ws-grid" id="ws-grid" style="grid-template-columns:repeat(${SIZE},1fr)"></div>
+      <div class="ws-words" id="ws-words"></div>
+    `;
+
+    // Render grid cells
+    const gridEl = document.getElementById('ws-grid');
+    for (let r=0;r<SIZE;r++) for (let c=0;c<SIZE;c++) {
+      const cell = document.createElement('div');
+      cell.className = 'ws-cell';
+      cell.textContent = grid[r][c];
+      cell.dataset.r = r; cell.dataset.c = c;
+      gridEl.appendChild(cell);
+    }
+
+    // Touch/mouse drag selection
+    gridEl.addEventListener('pointerdown', e => {
+      selecting = true;
+      const cell = e.target.closest('.ws-cell');
+      if (cell) { startX = +cell.dataset.r; startY = +cell.dataset.c; highlightLine(startX, startY, startX, startY); }
+    });
+    gridEl.addEventListener('pointermove', e => {
+      if (!selecting) return;
+      const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest?.('.ws-cell');
+      if (cell) highlightLine(startX, startY, +cell.dataset.r, +cell.dataset.c);
+    });
+    document.addEventListener('pointerup', () => {
+      if (!selecting) return;
+      selecting = false;
+      checkSelection();
+      document.querySelectorAll('.ws-cell.selected').forEach(c => c.classList.remove('selected'));
+      selCells = [];
+    });
+
+    // Word list
+    renderWordList();
+    startTimer();
+  }
+
+  function highlightLine(r1,c1,r2,c2) {
+    selCells = [];
+    document.querySelectorAll('.ws-cell.selected').forEach(c=>c.classList.remove('selected'));
+    const cells = getCellsInLine(r1,c1,r2,c2);
+    cells.forEach(([r,c]) => {
+      const cell = document.querySelector(`.ws-cell[data-r="${r}"][data-c="${c}"]`);
+      if (cell && !cell.classList.contains('found')) { cell.classList.add('selected'); selCells.push([r,c]); }
+    });
+  }
+
+  function getCellsInLine(r1,c1,r2,c2) {
+    const cells = [];
+    const dr = r2-r1, dc = c2-c1;
+    const steps = Math.max(Math.abs(dr),Math.abs(dc));
+    if (steps === 0) return [[r1,c1]];
+    // Only cardinal + diagonal
+    const sr = Math.round(dr/steps), sc = Math.round(dc/steps);
+    for (let i=0;i<=steps;i++) cells.push([r1+sr*i,c1+sc*i]);
+    return cells;
+  }
+
+  function checkSelection() {
+    if (selCells.length < 2) return;
+    const word = selCells.map(([r,c]) => grid[r][c]).join('');
+    const wordRev = word.split('').reverse().join('');
+    const match = allWords.find(w => (w.word === word || w.word === wordRev) && !foundWords.has(w.word));
+    if (match) {
+      foundWords.add(match.word);
+      selCells.forEach(([r,c]) => {
+        const cell = document.querySelector(`.ws-cell[data-r="${r}"][data-c="${c}"]`);
+        if (cell) { cell.classList.add('found'); cell.classList.remove('selected'); }
+      });
+      XPSystem.gain(25);
+      Toast.show('Таптыңыз: ' + match.word + ' 🎉', 'success');
+      renderWordList();
+      document.getElementById('ws-score').textContent = `${foundWords.size} / ${allWords.length}`;
+      if (foundWords.size === allWords.length) finish(true);
+    }
+  }
+
+  function renderWordList() {
+    const el = document.getElementById('ws-words');
+    if (!el) return;
+    el.innerHTML = allWords.map(w =>
+      `<div class="ws-word ${foundWords.has(w.word)?'found':''}">${w.word}</div>`
+    ).join('');
+  }
+
+  function startTimer() {
+    timeLeft = 120;
+    if (timer) clearInterval(timer);
+    timer = setInterval(() => {
+      timeLeft--;
+      const el = document.getElementById('ws-time');
+      if (el) {
+        const m = Math.floor(timeLeft/60), s = timeLeft%60;
+        el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+      }
+      if (timeLeft <= 0) finish(false);
+    }, 1000);
+  }
+
+  function finish(won) {
+    clearInterval(timer);
+    const el = document.getElementById('wordsearch-game');
+    if (won) { Particles.celebrate(); Store.state.totalWins++; }
+    el.innerHTML = `
+      <div class="result-overlay">
+        <div class="result-emoji">${won?'🔍':'⏰'}</div>
+        <div class="result-title">${won?'Баары табылды!':'Убакыт бүттү!'}</div>
+        <div style="font-size:14px;font-weight:700">${foundWords.size} / ${allWords.length} сөз</div>
+        <button class="play-again-btn" onclick="WordSearchGame.render()">🔍 Дагы ойно</button>
+      </div>
+    `;
+  }
+
+  return { render };
+})();
+
+/* ── MEMORY GAME ── */
+const MemoryGame = (() => {
+  const PAIRS = ['🍎🍎','🐆🐆','⛰️⛰️','💧💧','🌙🌙','⚔️⚔️','🏆🏆','🎮🎮'].map(p=>[p[0],p[1]]).flat();
+  let cards = [], flipped = [], matched = 0, canFlip = true, moves = 0;
+
+  function shuffle(arr) { return [...arr].sort(()=>Math.random()-.5); }
+
+  function render() {
+    cards = shuffle(PAIRS).map((emoji,i) => ({id:i,emoji,revealed:false,matched:false}));
+    flipped = []; matched = 0; moves = 0;
+
+    const el = document.getElementById('blitz-game');
+    el.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px">
+        <span>Жуп: <span id="mem-matched" style="color:#22c55e">0</span>/${PAIRS.length/2}</span>
+        <span>Кыймыл: <span id="mem-moves" style="color:var(--gold)">0</span></span>
+      </div>
+      <div id="mem-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+    `;
+    const g = document.getElementById('mem-grid');
+    cards.forEach(card => {
+      const c = document.createElement('div');
+      c.style.cssText = `aspect-ratio:1;background:var(--surface2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px solid var(--surface3);transition:all .3s;`;
+      c.textContent = '?';
+      c.onclick = () => flip(card, c);
+      c.id = 'card-' + card.id;
+      g.appendChild(c);
+    });
+  }
+
+  function flip(card, el) {
+    if (!canFlip || card.revealed || card.matched || flipped.length >= 2) return;
+    card.revealed = true;
+    el.textContent = card.emoji;
+    el.style.background = 'var(--surface3)';
+    flipped.push({card, el});
+    if (flipped.length === 2) {
+      moves++;
+      document.getElementById('mem-moves').textContent = moves;
+      canFlip = false;
+      setTimeout(checkPair, 700);
+    }
+  }
+
+  function checkPair() {
+    const [a, b] = flipped;
+    if (a.card.emoji === b.card.emoji) {
+      a.card.matched = b.card.matched = true;
+      a.el.style.background = 'rgba(34,197,94,.2)';
+      b.el.style.background = 'rgba(34,197,94,.2)';
+      matched++;
+      document.getElementById('mem-matched').textContent = matched;
+      XPSystem.gain(15);
+      if (matched === PAIRS.length/2) { setTimeout(()=>finish(), 400); }
+    } else {
+      a.card.revealed = b.card.revealed = false;
+      a.el.textContent = '?'; b.el.textContent = '?';
+      a.el.style.background = 'var(--surface2)'; b.el.style.background = 'var(--surface2)';
+    }
+    flipped = []; canFlip = true;
+  }
+
+  function finish() {
+    Particles.celebrate();
+    const el = document.getElementById('blitz-game');
+    el.innerHTML = `
+      <div class="result-overlay">
+        <div class="result-emoji">🧠</div>
+        <div class="result-title" style="color:var(--accent3)">Мыкты эс тутум!</div>
+        <div style="font-size:14px;font-weight:700">${moves} кыймыл менен бүттүрдүңүз</div>
+        <button class="play-again-btn" onclick="MemoryGame.render()">🧠 Дагы ойно</button>
+      </div>
+    `;
+  }
+  return { render };
+})();
+
+/* ── GAME MODAL ── */
+const GameModal = (() => {
+  const modal = document.getElementById('game-modal');
+  const content = document.getElementById('game-content');
+  const titleEl = document.getElementById('game-title');
+
+  const GAMES = {
+    tamgalar: { title:'🔮 Тамгалар', init: () => {
+      content.innerHTML = '<div id="tamgalar-game"></div>';
+      TamgalarGame.render();
+    }},
+    blitz: { title:'⚔️ Blitz Арена', init: () => {
+      content.innerHTML = '<div id="blitz-game"></div>';
+      BlitzGame.render();
+    }},
+    wordsearch: { title:'🔍 Сөз Издөө', init: () => {
+      content.innerHTML = '<div id="wordsearch-game"></div>';
+      WordSearchGame.render();
+    }},
+    memory: { title:'🧠 Эс Тутум', init: () => {
+      content.innerHTML = '<div id="blitz-game"></div>';
+      MemoryGame.render();
+    }},
+    daily: { title:'🌟 Күндүк Сынак', init: () => {
+      content.innerHTML = '<div id="tamgalar-game"></div>';
+      TamgalarGame.render();
+    }},
+  };
+
+  function open(gameId) {
+    const game = GAMES[gameId];
+    if (!game) return;
+    titleEl.textContent = game.title;
+    modal.classList.add('open');
+    game.init();
+  }
+
+  function close() {
+    modal.classList.remove('open');
+    content.innerHTML = '';
+  }
+
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+  return { open, close };
+})();
+
+/* ── PROFILE SCREEN ── */
+const ProfileScreen = {
+  ACHIEVEMENTS_DATA: [
+    { id:'first_win', icon:'🏆', label:'Биринчи Жеңүү' },
+    { id:'streak_3', icon:'🔥', label:'3 Катар' },
+    { id:'xp_1000', icon:'⚡', label:'1000 XP' },
+    { id:'games_10', icon:'🎮', label:'10 Оюн' },
+    { id:'elo_1100', icon:'⚔️', label:'1100 ELO' },
+    { id:'streak_7', icon:'💫', label:'7 Катар' },
+    { id:'words_master', icon:'📖', label:'Сөз Устасы' },
+    { id:'perfect_round', icon:'✨', label:'Идеал Раунд' },
+  ],
+  LEADERBOARD: [
+    { name:'Бекжан Т.', elo:1420, avatar:'🦁' },
+    { name:'Айгерим М.', elo:1380, avatar:'🌸' },
+    { name:'Нурлан А.', elo:1290, avatar:'⚡' },
+    { name:'Зарина К.', elo:1185, avatar:'🌟' },
+    { name:'Акбарс Баатыр', elo:0, avatar:'🐆', isMe:true },
+    { name:'Тимур Б.', elo:980, avatar:'🔥' },
+    { name:'Салтанат Э.', elo:920, avatar:'💎' },
+  ],
+
+  refresh() {
+    // Profile hero
+    document.getElementById('profile-elo').textContent = `⚔️ ${Store.state.elo} ELO`;
+    document.getElementById('profile-xp-bar').style.width = (Store.state.xp / Store.state.xpToNext * 100) + '%';
+    document.getElementById('stat-streak').textContent = Store.state.streak + '🔥';
+    document.getElementById('stat-games').textContent = Store.state.totalGames;
+    document.getElementById('stat-wins').textContent = Store.state.totalWins;
+    document.getElementById('stat-xp-total').textContent = Store.state.totalXP;
+
+    // Achievements
+    const grid = document.getElementById('achievements-grid');
+    grid.innerHTML = this.ACHIEVEMENTS_DATA.map(a => {
+      const unlocked = Store.state.achievements[a.id];
+      return `<div class="achievement ${unlocked?'unlocked':'locked'}" title="${a.label}">
+        <div class="achievement-icon">${a.icon}</div>
+        <div style="font-size:9px">${a.label}</div>
+      </div>`;
+    }).join('');
+
+    // Leaderboard with real ELO injected
+    const lb = this.LEADERBOARD.map(p => ({...p, elo: p.isMe ? Store.state.elo : p.elo}));
+    lb.sort((a,b) => b.elo - a.elo);
+    const list = document.getElementById('leaderboard-list');
+    list.innerHTML = lb.map((p,i) => {
+      const rank = i+1;
+      const rankClass = rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
+      const rankStr = rank<=3 ? ['🥇','🥈','🥉'][rank-1] : rank;
+      return `<div class="lb-row ${p.isMe?'me':''}">
+        <div class="lb-rank ${rankClass}">${rankStr}</div>
+        <div class="lb-avatar">${p.avatar}</div>
+        <div class="lb-name">${p.name}${p.isMe?' (Сиз)':''}</div>
+        <div class="lb-elo">${p.elo}</div>
+      </div>`;
+    }).join('');
+  }
+};
+
+/* ── DAILY TIMER ── */
+function updateDailyTimer() {
+  const now = new Date();
+  const midnight = new Date(now); midnight.setHours(24,0,0,0);
+  const diff = midnight - now;
+  const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000);
+  const el = document.getElementById('daily-timer');
+  if (el) el.textContent = `⏰ ${h}ч ${m}м кийин жаңыланат`;
+}
+updateDailyTimer();
+setInterval(updateDailyTimer, 60000);
+
+/* ── STREAK CHECK ── */
+function checkDailyStreak() {
+  const today = new Date().toDateString();
+  const lastPlay = localStorage.getItem('tilchi_last_play');
+  if (lastPlay !== today) {
+    localStorage.setItem('tilchi_last_play', today);
+    const day = new Date().getDay();
+    Store.state.streakDays[day] = true;
+    Store.state.streak++;
+    if (Store.state.streak >= 3) Store.state.achievements.streak_3 = true;
+    if (Store.state.streak >= 7) Store.state.achievements.streak_7 = true;
+  }
+}
+
+/* ── ACHIEVEMENTS CHECK ── */
+function checkAchievements() {
+  if (Store.state.totalWins >= 1) Store.state.achievements.first_win = true;
+  if (Store.state.totalXP >= 1000) Store.state.achievements.xp_1000 = true;
+  if (Store.state.totalGames >= 10) Store.state.achievements.games_10 = true;
+  if (Store.state.elo >= 1100) Store.state.achievements.elo_1100 = true;
+}
+
+/* ── LANGUAGE TOGGLE SETUP ── */
+document.getElementById('lang-toggle').addEventListener('click', I18N.cycle);
+
+/* ── LOADING SEQUENCE ── */
+const LOAD_TEXTS = [
+  'Барс ойготулуп жатат...',
+  'Тамгалар жүктөлүүдө...',
+  'ELO системасы даярдалуда...',
+  'Дүйнө жаратылуда...',
+];
+const loaderFill = document.getElementById('loader-fill');
+const loaderText = document.getElementById('loader-text');
+let loadStep = 0;
+const loadInterval = setInterval(() => {
+  loadStep++;
+  const pct = (loadStep / LOAD_TEXTS.length) * 100;
+  loaderFill.style.width = pct + '%';
+  loaderText.textContent = LOAD_TEXTS[loadStep - 1] || LOAD_TEXTS[0];
+  if (loadStep >= LOAD_TEXTS.length) {
+    clearInterval(loadInterval);
+    setTimeout(() => {
+      document.getElementById('loader').classList.add('hidden');
+      // Boot sequence
+      checkDailyStreak();
+      checkAchievements();
+      updateHeader();
+      renderStreak();
+      MapRenderer.render();
+      PetSystem.updateUI();
+      I18N.update();
+      // Welcome toast
+      setTimeout(() => Toast.show('Кош келдиңиз, Акбарс! 🐆', 'success', ''), 300);
+    }, 400);
+  }
+}, 500);
+</script>
+</body>
+</html>
